@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XML Content Table</title>
+    <!-- Load Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <center><h1>XML Content Table</h1></center>
+    <div class="form-group">
+        <label for="sortBy">Sort By:</label>
+        <select class="form-control" id="sortBy">
+            <option value="id">Id</option>
+            <option value="newspaperName">Newspaper Name</option>
+            <option value="width">Width</option>
+            <option value="height">Height</option>
+            <option value="dpi">DPI</option>
+            <option value="uploadTime">Upload Time</option>
+            <option value="filename">Filename</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="filterBy">Filter By Newspaper Name:</label>
+        <input type="text" class="form-control" id="filterBy">
+    </div>
+
+    <div class="form-group">
+        <label for="filterByWidth">Filter By Width:</label>
+        <input type="number" class="form-control" id="filterByWidth">
+    </div>
+
+    <div class="form-group">
+        <label for="filterByHeight">Filter By Height:</label>
+        <input type="number" class="form-control" id="filterByHeight">
+    </div>
+
+    <div class="form-group">
+        <label for="filterByDpi">Filter By DPI:</label>
+        <input type="number" class="form-control" id="filterByDpi">
+    </div>
+
+    <div class="form-group">
+        <label for="filterByFilename">Filter By Filename:</label>
+        <input type="text" class="form-control" id="filterByFilename">
+    </div>
+
+    <div class="form-group">
+        <label for="filterByUploadTime">Filter By Upload Time:</label>
+        <input type="datetime-local" class="form-control" id="filterByUploadTime">
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Newspaper Name</th>
+            <th>Width</th>
+            <th>Height</th>
+            <th>DPI</th>
+            <th>Upload Time</th>
+            <th>Filename</th>
+        </tr>
+        </thead>
+        <tbody id="xmlContentBody"></tbody>
+    </table>
+    <div class="text-center">
+        <button class="btn btn-primary" id="prevBtn">Previous</button>
+        <span id="paginationInfo"></span>
+        <button class="btn btn-primary" id="nextBtn">Next</button>
+    </div>
+</div>
+
+<!-- Load jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Variable to keep track of current page number and page size
+    var currentPage = 0;
+    var pageSize = 10;
+    var xmlContentPage; // Variable to store the fetched XML content page
+
+    // Function to fetch XML content based on sorting, paging, and filtering parameters
+    function fetchXmlContent() {
+        $.ajax({
+            url: '/xml/xml-content',
+            type: 'POST',
+            data: JSON.stringify({
+                page: currentPage,
+                size: pageSize,
+                sortBy: $('#sortBy').val(),
+                filterBy: $('#filterBy').val(),
+                width: $('#filterByWidth').val(),
+                height: $('#filterByHeight').val(),
+                dpi: $('#filterByDpi').val(),
+                filename: $('#filterByFilename').val(),
+                uploadTime: $('#filterByUploadTime').val()
+            }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (data) {
+                xmlContentPage = data;
+                populateTable(xmlContentPage);
+            },
+            error: function () {
+                alert('Error loading XML content from the server.');
+            }
+        });
+    }
+
+    // Function to populate the table with XML content
+    function populateTable(xmlContentPage) {
+        var tableBody = $('#xmlContentBody');
+        tableBody.empty();
+
+        $.each(xmlContentPage.content, function (index, xmlContent) {
+            var newRow = '<tr>' +
+                '<td>' + xmlContent.id + '</td>' +
+                '<td>' + xmlContent.newspaperName + '</td>' +
+                '<td>' + xmlContent.width + '</td>' +
+                '<td>' + xmlContent.height + '</td>' +
+                '<td>' + xmlContent.dpi + '</td>' +
+                '<td>' + formatUploadTime(xmlContent.uploadTime) + '</td>' +
+                '<td>' + xmlContent.filename + '</td>' +
+                '</tr>';
+
+            tableBody.append(newRow);
+        });
+
+        // Update pagination details
+        var paginationInfo = $('#paginationInfo');
+        paginationInfo.text('Showing page ' + (xmlContentPage.number + 1) + ' of ' + xmlContentPage.totalPages);
+
+        // Enable/disable previous and next buttons based on page number
+        $('#prevBtn').prop('disabled', xmlContentPage.first);
+        $('#nextBtn').prop('disabled', xmlContentPage.last);
+    }
+
+    // Function to format the uploadTime as a readable string (assuming ISO 8601 format)
+    function formatUploadTime(uploadTime) {
+        var date = new Date(uploadTime);
+        return date.toLocaleString(); // Format the date as a readable string
+    }
+
+    // Previous page button click event
+    $('#prevBtn').click(function () {
+        if (currentPage > 0) {
+            currentPage--;
+            fetchXmlContent();
+        }
+    });
+
+    // Next page button click event
+    $('#nextBtn').click(function () {
+        if (currentPage < xmlContentPage.totalPages - 1) {
+            currentPage++;
+            fetchXmlContent();
+        }
+    });
+
+    // Sorting and filtering input change events
+    $('#sortBy, #filterBy, #filterByWidth, #filterByHeight, #filterByDpi, #filterByFilename, #filterByUploadTime').on('input change', function () {
+        currentPage = 0;
+        fetchXmlContent();
+    });
+
+    // Initial fetch of XML content on page load
+    fetchXmlContent();
+</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysqldb:3306/xml_parsing
-    # jdbc:mysql://localhost:3306/xml_parsing?useSSL=false
+    url: jdbc:mysql://localhost:3306/xml_parsing?useSSL=false
+    # jdbc:mysql://mysqldb:3306/xml_parsing
     username: root
     password: root
     hikari:

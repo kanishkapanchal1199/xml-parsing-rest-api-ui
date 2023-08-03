@@ -45,10 +45,7 @@
         <input type="text" class="form-control" id="filterByFilename">
     </div>
 
-    <div class="form-group">
-        <label for="filterByUploadTime">Filter By Upload Time:</label>
-        <input type="datetime-local" class="form-control" id="filterByUploadTime">
-    </div>
+
 
     <table class="table table-bordered table-striped">
         <thead>
@@ -95,7 +92,7 @@
                 height: $('#filterByHeight').val(),
                 dpi: $('#filterByDpi').val(),
                 filename: $('#filterByFilename').val(),
-                uploadTime: $('#filterByUploadTime').val()
+
             }),
             contentType: 'application/json',
             dataType: 'json',
@@ -160,7 +157,7 @@
     });
 
     // Sorting and filtering input change events
-    $('#sortBy, #filterBy, #filterByWidth, #filterByHeight, #filterByDpi, #filterByFilename, #filterByUploadTime').on('input change', function () {
+    $('#sortBy, #filterBy, #filterByWidth, #filterByHeight, #filterByDpi, #filterByFilename').on('input change', function () {
         currentPage = 0;
         fetchXmlContent();
     });
